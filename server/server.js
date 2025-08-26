@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 4000;
 
 // Connect to DB
 connectDB();
-const allowedOrigins = ["http://localhost:5173"];
+const allowedOrigins = ["https://frontend-react-1m8f.onrender.com"];
 
 // Middlewares
 app.use(express.json());
