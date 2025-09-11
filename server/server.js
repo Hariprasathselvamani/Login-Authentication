@@ -12,9 +12,11 @@ const PORT = process.env.PORT || 4000;
 
 // Connect to DB
 connectDB();
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://mern-auth-frontend-s2q3.onrender.com",
+  "https://frontend-react-1m8f.onrender.com",
 ];
 
 // Middlewares
