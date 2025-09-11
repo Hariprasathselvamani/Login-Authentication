@@ -10,40 +10,39 @@ import userRouter from "./routes/userRoutes.js";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Connect to DB
+// Connect to MongoDB
 connectDB();
 
+// Allowed frontend origins
 const allowedOrigins = [
   "http://localhost:5173",
   "https://mern-auth-frontend-s2q3.onrender.com",
-  "https://frontend-react-1m8f.onrender.com",
 ];
 
-// Middlewares
 app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow Postman or server requests
+      if (!origin) return callback(null, true); // allow Postman/server
       if (allowedOrigins.indexOf(origin) === -1) {
-        const msg =
-          "The CORS policy for this site does not allow access from the specified Origin.";
-        return callback(new Error(msg), false);
+        return callback(
+          new Error("CORS policy does not allow this origin"),
+          false
+        );
       }
       return callback(null, true);
     },
-    credentials: true,
+    credentials: true, // important for cookies
   })
 );
 
-// API Endpoints
+// Routes
+app.use("/api/auth", authRouter);
+app.use("/api/user", userRouter);
+
 app.get("/", (req, res) => {
   res.send("API Working fine");
 });
 
-app.use("/api/auth", authRouter);
-app.use("/api/user", userRouter);
-
-// Start server
-app.listen(PORT, () => console.log(`Server started on PORT: ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on PORT: ${PORT}`));

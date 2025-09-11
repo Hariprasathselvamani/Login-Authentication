@@ -60,25 +60,26 @@ export const register = async (req, res) => {
 };
 
 // LOGIN
+
 export const login = async (req, res) => {
   const { email, password } = req.body;
+
   if (!email || !password) {
-    return res.json({
-      success: false,
-      message: "Email and Password are required",
-    });
+    return res
+      .status(400)
+      .json({ success: false, message: "Email and Password required" });
   }
 
   try {
     const user = await userModel.findOne({ email });
-    if (!user) {
-      return res.json({ success: false, message: "Invalid email" });
-    }
+    if (!user)
+      return res.status(401).json({ success: false, message: "Invalid email" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.json({ success: false, message: "Invalid password" });
-    }
+    if (!isMatch)
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid password" });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
@@ -86,14 +87,15 @@ export const login = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production", // true only in HTTPS prod
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
     });
 
-    return res.json({
+    res.json({
       success: true,
+      message: "Login successful",
       user: {
         _id: user._id,
         name: user.name,
@@ -101,8 +103,8 @@ export const login = async (req, res) => {
         isAccountVerified: user.isAccountVerified || false,
       },
     });
-  } catch (error) {
-    return res.json({ success: false, message: error.message });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
