@@ -1,19 +1,47 @@
 import axios from "axios";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useCallback } from "react";
 import { toast } from "react-toastify";
 
 const AppContent = createContext();
 
 const AppContextProvider = ({ children }) => {
-  axios.defaults.withCredentials = true;
-
   const backendUrl =
     import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
+  // States
   const [isLoggedin, setIsLoggedin] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const getAuthState = async () => {
+  // Axios global config
+  axios.defaults.withCredentials = true;
+
+  // Fetch user data
+  const getUserData = useCallback(async () => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/user/data`, {
+        withCredentials: true,
+      });
+      if (data.success) {
+        setUserData(data.userData);
+      } else {
+        setUserData(null);
+        setIsLoggedin(false);
+      }
+    } catch (err) {
+      if (err.response && err.response.status === 401) {
+        // Token expired or invalid
+        setIsLoggedin(false);
+        setUserData(null);
+      } else {
+        toast.error(err.response?.data?.message || err.message);
+      }
+    }
+  }, [backendUrl]);
+
+  // Check authentication state
+  const getAuthState = useCallback(async () => {
+    setLoading(true);
     try {
       const { data } = await axios.get(
         `${backendUrl}/api/auth/is-authenticated`,
@@ -22,45 +50,31 @@ const AppContextProvider = ({ children }) => {
         }
       );
 
-      // Only set logged in state and get user data if the response is successful
       if (data.success) {
         setIsLoggedin(true);
-        getUserData();
+        await getUserData();
       } else {
-        // For any other non-401 failure from the server, you could still toast.
-        // But the main goal is to not toast on the initial 401.
         setIsLoggedin(false);
+        setUserData(null);
       }
     } catch (err) {
-      // Check if the error is a 401 status
       if (err.response && err.response.status === 401) {
-        // This is the expected behavior for an unauthenticated user.
-        // Do nothing, do not show a toast message.
         setIsLoggedin(false);
+        setUserData(null);
       } else {
-        // This is for unexpected errors (e.g., server down, 500 status)
-        // In this case, you can show a toast message.
         toast.error(
           err.response?.data?.message || "An unexpected error occurred."
         );
       }
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [backendUrl, getUserData]);
 
-  const getUserData = async () => {
-    try {
-      const { data } = await axios.get(`${backendUrl}/api/user/data`, {
-        withCredentials: true,
-      });
-      if (data.success) setUserData(data.userData);
-    } catch (err) {
-      toast.error(err.response?.data?.message || err.message);
-    }
-  };
-
+  // On mount, check auth
   useEffect(() => {
     getAuthState();
-  }, []);
+  }, [getAuthState]);
 
   return (
     <AppContent.Provider
@@ -71,6 +85,8 @@ const AppContextProvider = ({ children }) => {
         userData,
         setUserData,
         getUserData,
+        getAuthState,
+        loading,
       }}
     >
       {children}

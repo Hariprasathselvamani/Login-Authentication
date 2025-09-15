@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { AppContent } from "../context/appContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+
 const Login = () => {
   const navigate = useNavigate();
   const { backendUrl, setIsLoggedin, getUserData } = useContext(AppContent);
@@ -14,40 +15,29 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   const onSubmitHandler = async (e) => {
+    e.preventDefault();
     try {
-      e.preventDefault();
-      axios.defaults.withCredentials = true; // cookies
+      const url =
+        state === "Sign up"
+          ? `${backendUrl}/api/auth/register`
+          : `${backendUrl}/api/auth/login`;
 
-      if (state === "Sign up") {
-        const { data } = await axios.post(backendUrl + "/api/auth/register", {
-          name,
-          email,
-          password,
-        });
+      const body =
+        state === "Sign up" ? { name, email, password } : { email, password };
 
-        if (data.success) {
-          setIsLoggedin(true);
-          getUserData();
-          navigate("/");
-        } else {
-          toast.error(data.message);
-        }
+      const { data } = await axios.post(url, body, {
+        withCredentials: true, // crucial for JWT cookies
+      });
+
+      if (data.success) {
+        setIsLoggedin(true);
+        await getUserData(); // fetch user data after login/signup
+        navigate("/");
       } else {
-        const { data } = await axios.post(backendUrl + "/api/auth/login", {
-          email,
-          password,
-        });
-
-        if (data.success) {
-          setIsLoggedin(true);
-          getUserData();
-          navigate("/");
-        } else {
-          toast.error(data.message);
-        }
+        toast.error(data.message || "Something went wrong.");
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 
