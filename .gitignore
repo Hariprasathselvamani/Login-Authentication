@@ -1,0 +1,7 @@
+node_modules
+
+# Backend environment
+server/.env
+
+# Frontend environment
+client/.env
