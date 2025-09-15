@@ -9,7 +9,12 @@ connectDB();
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: "http://localhost:5173", credentials: true })); // adjust frontend URL
+app.use(
+  cors({
+    origin: "https://auth-f2lo12tge-hariprasathselvamanis-projects.vercel.app",
+    credentials: true,
+  })
+); // adjust frontend URL
 
 // Mount routes
 app.use("/api/auth", authRouter);
