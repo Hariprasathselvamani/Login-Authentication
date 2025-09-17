@@ -1,7 +1,18 @@
-node_modules
+# Node modules
+node_modules/
 
-# Backend environment
-server/.env
+# Environment variables
+.env
 
-# Frontend environment
-client/.env
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Build output
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db

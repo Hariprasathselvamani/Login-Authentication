@@ -9,9 +9,14 @@ connectDB();
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+
+const allowedOrigins = [
+  "http://localhost:5173", // local frontend
+  "https://auth-f2lo12tge-hariprasathselvamanis-projects.vercel.app", // deployed frontend
+].filter(Boolean);
 app.use(
   cors({
-    origin: "https://auth-f2lo12tge-hariprasathselvamanis-projects.vercel.app",
+    origin: allowedOrigins,
     credentials: true,
   })
 ); // adjust frontend URL
