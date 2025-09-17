@@ -12,7 +12,7 @@ app.use(cookieParser());
 
 const allowedOrigins = [
   "http://localhost:5173", // local frontend
-  "https://auth-f2lo12tge-hariprasathselvamanis-projects.vercel.app", // deployed frontend
+  process.env.FRONTEND_URL, // deployed frontend
 ].filter(Boolean);
 app.use(
   cors({
@@ -20,6 +20,12 @@ app.use(
     credentials: true,
   })
 ); // adjust frontend URL
+
+app.get("/", (req, res) => res.send("API Working"));
+
+app.use((req, res, next) => {
+    res.status(404).json({ success: false, message: "API route not found" });
+});
 
 // Mount routes
 app.use("/api/auth", authRouter);
