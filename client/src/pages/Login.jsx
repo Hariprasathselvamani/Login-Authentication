@@ -16,6 +16,7 @@ const Login = () => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+    console.log({ name, email, password, state })
     try {
       const url =
         state === "Sign up"
@@ -104,7 +105,7 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium cursor-pointer"
+            className="w-full py-2.5 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-900 text-white font-medium cursor-pointer"
           >
             {state}
           </button>
