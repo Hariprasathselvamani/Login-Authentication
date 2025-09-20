@@ -12,7 +12,7 @@ app.use(cookieParser());
 
 const allowedOrigins = [
   "http://localhost:5173", // local frontend
-  process.env.FRONTEND_URL, // deployed frontend
+   // deployed frontend
 ].filter(Boolean);
 app.use(
   cors({
@@ -23,13 +23,15 @@ app.use(
 
 app.get("/", (req, res) => res.send("API Working"));
 
-app.use((req, res, next) => {
-    res.status(404).json({ success: false, message: "API route not found" });
-});
+
 
 // Mount routes
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
+
+app.use((req, res, next) => {
+    res.status(404).json({ success: false, message: "API route not found" });
+});
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
